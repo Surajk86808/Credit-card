@@ -1,0 +1,4 @@
+data_ingestion:
+  bucket_name: "project_878787"
+  bucket_file_name:
+   - "enhanced_credit_card_fraud_dataset_2M.csv"   
