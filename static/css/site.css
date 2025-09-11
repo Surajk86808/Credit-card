@@ -1,18 +1,50 @@
 /* Shared site styles for CredSafe */
 :root {
   --brand-color: #60a5fa;
+  --bg-dark: #0b1220;         /* darker for contrast */
+  --text-main: #f3f4f6;       /* near white */
+  --text-muted: #cbd5e1;      /* muted */
+  --panel: rgba(255,255,255,0.10); /* increase opacity for contrast */
+  --panel-border: rgba(255,255,255,0.24);
 }
+
+/* Global base adjustments for better contrast */
+body { background: var(--bg-dark) !important; color: var(--text-main) !important; }
+.glass { background: var(--panel) !important; border: 1px solid var(--panel-border) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
 .navbar .navbar-brand.brand {
   font-weight: 800;
   letter-spacing: .5px;
   font-size: 1.5rem; /* slightly larger */
 }
-.navbar .nav-link { color: #cbd5e1; }
-.navbar .nav-link.active { color: #fff; }
+.navbar { background: rgba(0,0,0,0.35) !important; backdrop-filter: blur(8px); }
+.navbar .nav-link { color: #d1d5db !important; }
+.navbar .nav-link.active, .navbar .nav-link:hover { color: #fff !important; }
 .footer-bar {
-  background: rgba(255,255,255,0.06);
-  color: #94a3b8;
+  background: rgba(255,255,255,0.08);
+  color: #e5e7eb;
 }
+
+/* Forms: high-contrast inputs */
+.form-control, .form-select {
+  background: rgba(0,0,0,0.35) !important;
+  color: var(--text-main) !important;
+  border: 1px solid rgba(255,255,255,0.25) !important;
+}
+.form-control::placeholder { color: #9ca3af; }
+.form-label { color: #e2e8f0 !important; font-weight: 600; }
+
+/* Buttons */
+.btn-gradient { box-shadow: 0 6px 18px rgba(99,102,241,.45) !important; }
+.btn-outline-light { color: #f3f4f6 !important; border-color: #f3f4f6 !important; }
+.btn-outline-light:hover { background: rgba(255,255,255,0.12) !important; }
+
+/* Cards/results */
+.result-card { background: rgba(34,197,94,0.08) !important; }
+.result-card.danger { background: rgba(239,68,68,0.10) !important; }
+
+/* Utility */
+.header-logo { height: 34px; width: auto; }
 .responsive-embed { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
 .responsive-embed iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
-.header-logo { height: 34px; width: auto; }

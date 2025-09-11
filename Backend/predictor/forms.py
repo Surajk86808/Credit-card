@@ -11,6 +11,13 @@ class FallbackPredictForm(forms.Form):
         ("rupay", "RuPay"),
     ]
 
+    CARD_TYPE_CHOICES = [
+        ("credit", "Credit"),
+        ("debit", "Debit"),
+        ("prepaid", "Prepaid"),
+        ("virtual", "Virtual"),
+    ]
+
     TRANSACTION_TYPE_CHOICES = [
         ("online", "Online"),
         ("in_store", "In-Store/POS"),
@@ -18,15 +25,17 @@ class FallbackPredictForm(forms.Form):
         ("recurring", "Recurring"),
     ]
 
-    LOCATION_TYPE_CHOICES = [
-        ("domestic", "Domestic"),
-        ("international", "International"),
-    ]
-
-    DEVICE_TYPE_CHOICES = [
-        ("mobile", "Mobile"),
-        ("desktop", "Desktop"),
-        ("card_reader", "Card Reader/Terminal"),
+    COUNTRY_CHOICES = [
+        ("US", "United States"),
+        ("IN", "India"),
+        ("GB", "United Kingdom"),
+        ("CA", "Canada"),
+        ("AU", "Australia"),
+        ("DE", "Germany"),
+        ("FR", "France"),
+        ("SG", "Singapore"),
+        ("AE", "United Arab Emirates"),
+        ("JP", "Japan"),
     ]
 
     MERCHANT_CATEGORY_CHOICES = [
@@ -47,12 +56,17 @@ class FallbackPredictForm(forms.Form):
             "class": "form-control",
             "placeholder": "1234 5678 9012 3456",
             "inputmode": "numeric",
-            "pattern": "\\d{16,19}",
+            "pattern": "\\d{16}",
         }),
     )
     card_network = forms.ChoiceField(
         label="Card Network",
         choices=CARD_NETWORK_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    card_type = forms.ChoiceField(
+        label="Card Type",
+        choices=CARD_TYPE_CHOICES,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
     transaction_type = forms.ChoiceField(
@@ -61,45 +75,47 @@ class FallbackPredictForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-control"}),
     )
     amount = forms.FloatField(
-        label="Amount",
+        label="Transaction Amount",
         min_value=0.0,
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "placeholder": "e.g., 199.99"}),
+        widget=forms.NumberInput(attrs={
+            "class": "form-control",
+            "step": "0.01",
+            "placeholder": "e.g., 199.99",
+            "inputmode": "decimal",
+        }),
     )
-    time_of_day = forms.IntegerField(
-        label="Hour of Day (0-23)",
-        min_value=0,
-        max_value=23,
-        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g., 14"}),
+    transaction_time = forms.TimeField(
+        label="Transaction Time",
+        widget=forms.TimeInput(attrs={
+            "class": "form-control",
+            "type": "time",
+        }),
+    )
+    transaction_location = forms.ChoiceField(
+        label="Transaction Location (Country)",
+        choices=COUNTRY_CHOICES,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
+    is_international = forms.BooleanField(
+        label="Is International?",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     merchant_category = forms.ChoiceField(
         label="Merchant Category",
         choices=MERCHANT_CATEGORY_CHOICES,
         widget=forms.Select(attrs={"class": "form-control"}),
     )
-    location_type = forms.ChoiceField(
-        label="Location Type",
-        choices=LOCATION_TYPE_CHOICES,
-        widget=forms.Select(attrs={"class": "form-control"}),
-    )
-    device_type = forms.ChoiceField(
-        label="Device Type",
-        choices=DEVICE_TYPE_CHOICES,
-        widget=forms.Select(attrs={"class": "form-control"}),
-    )
-    customer_age = forms.IntegerField(
-        label="Customer Age",
-        min_value=16,
-        max_value=100,
-        widget=forms.NumberInput(attrs={"class": "form-control", "placeholder": "e.g., 32"}),
-    )
     credit_limit = forms.FloatField(
         label="Credit Limit",
         min_value=0.0,
+        required=False,
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "placeholder": "e.g., 5000"}),
     )
     balance = forms.FloatField(
         label="Current Balance",
         min_value=0.0,
+        required=False,
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01", "placeholder": "e.g., 1200"}),
     )
 
