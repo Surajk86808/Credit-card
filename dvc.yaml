@@ -1,0 +1,11 @@
+metrics:
+- artifacts/metrics/metrics.json
+- artifacts/metrics/metrics.json
+- artifacts/metrics/metrics.json
+plots:
+- artifacts/metrics/plots/metrics:
+    x: step
+- artifacts/metrics/plots/metrics:
+    x: step
+- artifacts/metrics/plots/metrics:
+    x: step

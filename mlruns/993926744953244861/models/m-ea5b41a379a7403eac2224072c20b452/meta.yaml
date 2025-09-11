@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/Laptop/OneDrive/Desktop/neww/mlruns/993926744953244861/models/m-ea5b41a379a7403eac2224072c20b452/artifacts
+creation_timestamp: 1757549386495
+experiment_id: '993926744953244861'
+last_updated_timestamp: 1757549405271
+model_id: m-ea5b41a379a7403eac2224072c20b452
+model_type: null
+name: model
+source_run_id: aa961ab811ef4a29927b28819bc478da
+status: 2
+status_message: null
