@@ -1,25 +1,503 @@
-{% extends 'base.html' %}
-{% block title %}CredSafe — Tableau Dashboard{% endblock %}
-{% block nav_dashboard_active %}active{% endblock %}
-{% block content %}
-  <div class="row g-4">
-    <div class="col-12">
-      <div class="p-3 glass">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0">Tableau Dashboard</h5>
-          <small class="muted">Use the URL query param <code>?embed=</code> to set your viz URL</small>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection Security Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90a4;
+            --success-green: #5cb85c;
+            --danger-red: #d9534f;
+            --light-gray: #f8f9fa;
+            --dark-gray: #6c757d;
+        }
+
+        body {
+            background-color: var(--light-gray);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid var(--light-gray);
+            font-weight: 600;
+            color: var(--dark-gray);
+            padding: 1rem 1.25rem;
+        }
+
+        .kpi-card {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar-custom {
+            height: 25px;
+            margin-bottom: 0.75rem;
+            border-radius: 12px;
+        }
+
+        .chart-container {
+            padding: 1.5rem;
+            min-height: 300px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .bar-label {
+            min-width: 100px;
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        .bar-visual {
+            flex: 1;
+            margin: 0 1rem;
+        }
+
+        .bar-value {
+            min-width: 60px;
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--dark-gray);
+        }
+
+        .line-chart-mock {
+            background: linear-gradient(45deg, var(--success-green) 0%, var(--primary-blue) 100%);
+            height: 200px;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .line-chart-mock::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+        }
+
+        .metric-badge {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin: 0.25rem;
+        }
+
+        .fraud-indicator {
+            background-color: var(--danger-red);
+        }
+
+        .legit-indicator {
+            background-color: var(--success-green);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            border-bottom: 2px solid var(--primary-blue);
+            padding-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <h1 class="mb-0">Fraud Detection Security Dashboard</h1>
+            <p class="mb-0 opacity-75">Real-time Transaction Monitoring & Risk Assessment</p>
         </div>
-        <div class="responsive-embed">
-          {% if tableau_embed_url %}
-            <iframe title="Tableau" src="{{ tableau_embed_url }}" allowfullscreen="true"></iframe>
-          {% else %}
-            <div class="d-flex w-100 h-100 align-items-center justify-content-center flex-column text-center">
-              <div class="mb-2">Provide your Tableau Embed URL to view the visualization.</div>
-              <code class="small text-wrap">/dashboard/tableau/?embed=https://public.tableau.com/views/YOUR_WORKBOOK/YOUR_SHEET?:showVizHome=no</code>
-            </div>
-          {% endif %}
-        </div>
-      </div>
     </div>
-  </div>
-{% endblock %}
+
+    <div class="container-fluid">
+        <!-- KPI Row -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="kpi-card">
+                        <div class="kpi-value text-primary">1000K</div>
+                        <div class="kpi-label">Total Transactions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="kpi-card">
+                        <div class="kpi-value text-danger">4K</div>
+                        <div class="kpi-label">Fraud Transactions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="kpi-card">
+                        <div class="kpi-value text-warning">0.004</div>
+                        <div class="kpi-label">Fraud Percentage</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="kpi-card">
+                        <div class="kpi-value text-info">1.5M</div>
+                        <div class="kpi-label">Total Fraud Amount</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Transaction Timeline Analysis</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="line-chart-mock d-flex align-items-end justify-content-between p-3">
+                            <div class="text-white">
+                                <small>Start: 56,152</small>
+                            </div>
+                            <div class="text-white">
+                                <small>Peak: 11,964,651</small>
+                            </div>
+                        </div>
+                        <div class="mt-3 d-flex justify-content-center">
+                            <span class="metric-badge legit-indicator">Legitimate Transactions</span>
+                            <span class="metric-badge fraud-indicator">Fraud Transactions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Transaction Locations</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">ATM</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 15%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">15%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">In-Store</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">35%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Online</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 48%"></div>
+                                    <div class="progress-bar bg-danger" style="width: 2%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">50%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Age Group Risk Analysis</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="section-title">Fraud Rate by Age Group</div>
+                        <div class="bar-item">
+                            <div class="bar-label">18-24</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-primary" style="width: 55%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">0.0055</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">25-34</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-primary" style="width: 52%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">0.0052</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">35-44</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-primary" style="width: 48%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">0.0048</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">45-59</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-primary" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">0.0050</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3 -->
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Card Network Analysis</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Amex</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 10%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">10%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Discover</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 8%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">8%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Mastercard</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 32%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">32%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Visa</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 48%"></div>
+                                    <div class="progress-bar bg-danger" style="width: 2%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">50%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Card Type Distribution</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Credit</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 68%"></div>
+                                    <div class="progress-bar bg-danger" style="width: 2%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">70%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Debit</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 25%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">25%</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Prepaid</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 5%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">5%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Card Presence</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Present</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">419,302</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Not Present</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-warning" style="width: 5%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">Small %</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Features Row -->
+        <div class="row mt-4">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">EMV Chip Usage</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Chip Used</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 98%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">836,036</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">No Chip</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-danger" style="width: 2%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">Small %</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">CVV Verification</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Match</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">20,379</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">No Match</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-danger" style="width: 8%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">1,823</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Contactless Usage</h5>
+                    </div>
+                    <div class="chart-container">
+                        <div class="bar-item">
+                            <div class="bar-label">Contactless</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-success" style="width: 95%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">314,131</div>
+                        </div>
+                        <div class="bar-item">
+                            <div class="bar-label">Contact</div>
+                            <div class="bar-visual">
+                                <div class="progress progress-bar-custom">
+                                    <div class="progress-bar bg-info" style="width: 5%"></div>
+                                </div>
+                            </div>
+                            <div class="bar-value">1,700</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

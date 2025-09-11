@@ -49,10 +49,60 @@
           </div>
           <div class="mt-4 d-grid d-md-flex gap-2">
             <button class="btn btn-gradient px-4 py-2 animate__animated animate__pulse" type="submit">Predict</button>
-            <a class="btn btn-outline-light px-4 py-2" href="{%- url 'home' -%}">Reset</a>
+            <a class="btn btn-outline-light px-4 py-2" href="{% url 'home' %}">Reset</a>
           </div>
           {% else %}
-          <div class="alert alert-warning" role="alert">Could not infer feature names. Ensure the raw CSV exists or a feature_names.pkl is available.</div>
+          <div class="alert alert-warning" role="alert">
+            {% if error %}
+              <!-- Configuration details hidden intentionally -->
+            {% else %}
+              Could not infer feature names. Ensure the raw CSV exists or a feature_names.pkl is available.
+            {% endif %}
+            {% if helper_message %}
+            <div class="alert alert-success mt-2">{{ helper_message }}</div>
+            {% endif %}
+            {% if helper_error %}
+            <div class="alert alert-danger mt-2">{{ helper_error }}</div>
+            {% endif %}
+            <hr>
+            <form method="post" class="mb-3 d-grid d-md-flex gap-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="helper_action" value="create_dirs" />
+              <button class="btn btn-sm btn-outline-light" type="submit">
+                Ensure artifact directories
+              </button>
+            </form>
+            <form method="post" class="mb-3 d-grid d-md-flex gap-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="helper_action" value="dvc_pull" />
+              <button class="btn btn-sm btn-outline-warning" type="submit">DVC Pull</button>
+            </form>
+            <form method="post" class="mb-3 d-grid d-md-flex gap-2 align-items-end">
+              {% csrf_token %}
+              <input type="hidden" name="helper_action" value="download_csv" />
+              <input name="csv_url" class="form-control form-control-sm" placeholder="Paste CSV URL (https://...)" />
+              <button class="btn btn-sm btn-outline-info" type="submit">Download CSV</button>
+            </form>
+            <small class="text-muted d-block">Tip: After pulling/downloading, refresh this page to load dynamic fields.</small>
+            <hr>
+            A simplified form is shown below so you can still test predictions and UI.
+          </div>
+          <div class="row g-3">
+            {% for field in form %}
+            <div class="col-12 col-md-6">
+              <label class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}<small class="text-muted d-block">{{ field.help_text }}</small>{% endif %}
+              {% if field.errors %}
+              <div class="text-danger small">{{ field.errors|striptags }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          <div class="mt-4 d-grid d-md-flex gap-2">
+            <button class="btn btn-gradient px-4 py-2" type="submit">Predict</button>
+            <a class="btn btn-outline-light px-4 py-2" href="{% url 'predict' %}">Reset</a>
+          </div>
           {% endif %}
         </form>
       </div>

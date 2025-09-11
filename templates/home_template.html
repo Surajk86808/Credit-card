@@ -230,24 +230,9 @@
             100% { transform: scale(1); }
         }
     </style>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(255,255,255,0.06)">
-        <div class="container">
-            <a class="navbar-brand brand" href="/">CredSafe</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbars" aria-controls="navbars" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbars">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/predict/">Predict</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/dashboard/">Dashboard</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% endblock %}
+{% block content %}
+    <!-- Page header moved to base.html navbar; keep a slim hero bar here if needed -->
     <!-- Floating Elements -->
     <div class="floating-elements">
         <i class="fas fa-shield-alt floating-element"></i>
@@ -262,7 +247,7 @@
                 <div class="col-lg-6">
                     <div class="animate__animated animate__fadeInLeft">
                         <h1 class="hero-title">CredSafe — Credit Card Fraud Detection</h1>
-                        <p class="hero-subtitle">Advanced AI-powered fraud detection using machine learning algorithms to protect your financial transactions in real-time.</p>
+                        <p class="hero-subtitle">Advanced ML-powered fraud detection using machine learning algorithms to protect your financial transactions in real-time.</p>
                         
                         <div class="row g-4 mb-5">
                             <div class="col-md-4">
@@ -303,7 +288,7 @@
                         <div class="row g-4">
                             <!-- Prediction Card -->
                             <div class="col-md-6">
-                                <div class="glass-morphism action-card p-4 h-100 text-center" onclick="window.location.href='{% url 'predict' %}'">
+                                <a href="{% url 'predict' %}" class="glass-morphism action-card p-4 h-100 text-center d-block text-decoration-none">
                                     <div class="feature-icon mb-3">
                                         <i class="fas fa-brain"></i>
                                     </div>
@@ -312,12 +297,12 @@
                                     <div class="btn btn-outline-light btn-sm">
                                         Start Detection <i class="fas fa-arrow-right ms-1"></i>
                                     </div>
-                                </div>
+                                </a>
                             </div>
 
                             <!-- Dashboard Card -->
                             <div class="col-md-6">
-                                <div class="glass-morphism action-card p-4 h-100 text-center" onclick="window.location.href='{% url 'dashboard' %}'">
+                                <a href="{% url 'dashboard' %}" class="glass-morphism action-card p-4 h-100 text-center d-block text-decoration-none">
                                     <div class="feature-icon mb-3">
                                         <i class="fas fa-chart-line"></i>
                                     </div>
@@ -326,7 +311,7 @@
                                     <div class="btn btn-outline-light btn-sm">
                                         View Analytics <i class="fas fa-arrow-right ms-1"></i>
                                     </div>
-                                </div>
+                                </a>
                             </div>
 
                             <!-- Features Card -->
@@ -499,5 +484,4 @@
             observer.observe(statsContainer);
         }
     </script>
-</body>
-</html>
+{% endblock %}

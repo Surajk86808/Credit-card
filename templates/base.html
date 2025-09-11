@@ -19,7 +19,7 @@
   <!-- Header / Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(255,255,255,0.06)">
     <div class="container">
-      <a class="navbar-brand brand d-flex align-items-center gap-2" href="{%- url 'home' -%}">
+      <a class="navbar-brand brand d-flex align-items-center gap-2" href="{% url 'home' %}">
         <img class="header-logo" src="{% static 'img/credsafe.svg' %}" alt="CredSafe" onerror="this.style.display='none'" />
         <span>CredSafe</span>
       </a>
@@ -28,16 +28,11 @@
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link {% block nav_home_active %}{% endblock %}" href="{%- url 'home' -%}">Home</a></li>
-          <li class="nav-item"><a class="nav-link {% block nav_predict_active %}{% endblock %}" href="{%- url 'predict' -%}">Predict</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle {% block nav_dashboard_active %}{% endblock %}" href="#" id="dashDrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dashboards</a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashDrop">
-              <li><a class="dropdown-item" href="{%- url 'dashboard' -%}">Built-in (Chart.js)</a></li>
-              <li><a class="dropdown-item" href="{%- url 'dashboard_powerbi' -%}">Power BI</a></li>
-              <li><a class="dropdown-item" href="{%- url 'dashboard_tableau' -%}">Tableau</a></li>
-            </ul>
-          </li>
+          <li class="nav-item"><a class="nav-link {% block nav_home_active %}{% endblock %}" href="{% url 'home' %}">Home</a></li>
+          <li class="nav-item"><a class="nav-link {% block nav_predict_active %}{% endblock %}" href="{% url 'predict' %}">Predict</a></li>
+          <li class="nav-item"><a class="nav-link {% block nav_dashboard_active %}{% endblock %}" href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_powerbi' %}">Power BI</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_tableau' %}">Tableau</a></li>
         </ul>
       </div>
     </div>
@@ -53,9 +48,9 @@
     <div class="container d-flex flex-wrap justify-content-between align-items-center">
       <div class="small">© 2025 CredSafe. All rights reserved.</div>
       <div class="small">
-        <a class="text-decoration-none me-3" href="{%- url 'dashboard' -%}">Dashboard</a>
-        <a class="text-decoration-none me-3" href="{%- url 'predict' -%}">Predict</a>
-        <a class="text-decoration-none" href="{%- url 'home' -%}">Home</a>
+        <a class="text-decoration-none me-3" href="{% url 'dashboard' %}">Dashboard</a>
+        <a class="text-decoration-none me-3" href="{% url 'predict' %}">Predict</a>
+        <a class="text-decoration-none" href="{% url 'home' %}">Home</a>
       </div>
     </div>
   </footer>

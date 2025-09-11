@@ -5,17 +5,27 @@ import json
 import joblib
 import numpy as np
 import pandas as pd
+import subprocess
+import urllib.request
+import urllib.error
+from .forms import FallbackPredictForm
 
 # Paths to artifacts
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 ART_DIR = os.path.join(PROJECT_ROOT, 'artifacts', 'preprocessed')
-RAW_CSV = os.path.join(PROJECT_ROOT, 'artifacts', 'raw', 'enhanced_credit_card_fraud_dataset_2M.csv')
+RAW_DIR = os.path.join(PROJECT_ROOT, 'artifacts', 'raw')
+RAW_CSV = os.path.join(RAW_DIR, 'enhanced_credit_card_fraud_dataset_2M.csv')
 
 # Globals loaded once
 MODEL = None
 SCALER = None
 FEATURE_NAMES = None
 TARGET_NAME = None
+
+
+def _ensure_dirs():
+    os.makedirs(RAW_DIR, exist_ok=True)
+    os.makedirs(ART_DIR, exist_ok=True)
 
 
 def _infer_schema_from_csv(sample_rows=2000):
@@ -73,16 +83,66 @@ class DynamicPredictForm(forms.Form):
 
 def predict_view(request):
     """Interactive prediction form with optional probability display."""
+    _ensure_dirs()
     _load_artifacts()
     context = {
         'has_model': MODEL is not None and SCALER is not None,
     }
 
+    # Handle helper actions first
+    if request.method == 'POST' and request.POST.get('helper_action'):
+        action = request.POST.get('helper_action')
+        try:
+            if action == 'create_dirs':
+                _ensure_dirs()
+                context['helper_message'] = f"Directories ensured: {RAW_DIR} and {ART_DIR}"
+            elif action == 'dvc_pull':
+                try:
+                    result = subprocess.run(
+                        ['dvc', 'pull'], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=600
+                    )
+                    if result.returncode == 0:
+                        context['helper_message'] = 'dvc pull completed successfully.'
+                    else:
+                        context['helper_error'] = f"dvc pull failed: {result.stderr or result.stdout}"
+                except Exception as e:
+                    context['helper_error'] = f"dvc pull error: {e}"
+            elif action == 'download_csv':
+                csv_url = request.POST.get('csv_url', '').strip()
+                if not (csv_url.startswith('http://') or csv_url.startswith('https://')):
+                    context['helper_error'] = 'Please provide a valid http(s) URL to a CSV file.'
+                elif not csv_url.lower().endswith('.csv'):
+                    context['helper_error'] = 'URL must point to a .csv file.'
+                else:
+                    _ensure_dirs()
+                    try:
+                        urllib.request.urlretrieve(csv_url, RAW_CSV)
+                        context['helper_message'] = f'Downloaded CSV to {RAW_CSV}'
+                    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+                        context['helper_error'] = f'Failed to download CSV: {e}'
+            else:
+                context['helper_error'] = 'Unknown action.'
+        finally:
+            # Reload artifacts/schema after helper actions
+            _load_artifacts()
+
     feature_names = FEATURE_NAMES or []
 
-    if request.method == 'POST' and feature_names:
-        form = DynamicPredictForm(request.POST, feature_names=feature_names)
-        if form.is_valid() and MODEL is not None and SCALER is not None:
+    # Choose form: dynamic numeric (when features known) or rich fallback
+    if feature_names:
+        BaseFormClass = DynamicPredictForm
+        form_kwargs = { 'feature_names': feature_names }
+    else:
+        BaseFormClass = FallbackPredictForm
+        form_kwargs = {}
+        context['error'] = (
+            'Could not infer feature names. Ensure the raw CSV exists at '
+            f'{RAW_CSV} or a feature_names.pkl is available in {ART_DIR}.'
+        )
+
+    if request.method == 'POST' and not request.POST.get('helper_action'):
+        form = BaseFormClass(request.POST, **form_kwargs)
+        if form.is_valid() and MODEL is not None and SCALER is not None and feature_names:
             # Arrange features in training order
             values = [form.cleaned_data[name] for name in feature_names]
             X = np.array(values, dtype=float).reshape(1, -1)
@@ -104,7 +164,7 @@ def predict_view(request):
             })
             return render(request, 'predict.html', context)
     else:
-        form = DynamicPredictForm(feature_names=feature_names)
+        form = BaseFormClass(**form_kwargs)
 
     context.update({
         'form': form,

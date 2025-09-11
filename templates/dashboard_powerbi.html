@@ -1,25 +1,731 @@
-{% extends 'base.html' %}
-{% block title %}CredSafe — Power BI Dashboard{% endblock %}
-{% block nav_dashboard_active %}active{% endblock %}
-{% block content %}
-  <div class="row g-4">
-    <div class="col-12">
-      <div class="p-3 glass">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0">Power BI Dashboard</h5>
-          <small class="muted">Use the URL query param <code>?embed=</code> to set your report URL</small>
-        </div>
-        <div class="responsive-embed">
-          {% if powerbi_embed_url %}
-            <iframe title="Power BI" src="{{ powerbi_embed_url }}" allowfullscreen="true"></iframe>
-          {% else %}
-            <div class="d-flex w-100 h-100 align-items-center justify-content-center flex-column text-center">
-              <div class="mb-2">Provide your Power BI Embed URL to view the report.</div>
-              <code class="small text-wrap">/dashboard/powerbi/?embed=https://app.powerbi.com/view?r=YOUR_REPORT_ID</code>
-            </div>
-          {% endif %}
-        </div>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fraud Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #ef4444;
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --border-color: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Main Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Filter Sidebar */
+        .filter-sidebar {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar-title::before {
+            content: '🎛';
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .filter-group {
+            margin-bottom: 25px;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .filter-control option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
+        .reset-button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent-secondary), #dc2626);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 25px;
+            display: grid;
+            gap: 20px;
+            grid-template-rows: auto auto 1fr;
+        }
+
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .kpi-card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-primary);
+        }
+
+        .kpi-card.fraud::before { background: var(--accent-secondary); }
+        .kpi-card.rate::before { background: var(--accent-warning); }
+        .kpi-card.avg::before { background: var(--accent-success); }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .kpi-trend {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--accent-secondary);
+        }
+
+        .trend-down {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-success);
+        }
+
+        .kpi-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 350px 350px 400px;
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .chart-card.wide {
+            grid-column: 1 / -1;
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: calc(100% - 60px);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(5, 350px);
+            }
+            
+            .chart-card.wide {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+            }
+            
+            .filter-sidebar {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Advanced Fraud Analytics</h1>
+        <p>Real-time fraud detection dashboard with advanced filtering and analytics</p>
     </div>
-  </div>
-{% endblock %}
+
+    <div class="dashboard-layout">
+        <!-- Filter Sidebar -->
+        <div class="filter-sidebar">
+            <div class="sidebar-title">Filters & Slicers</div>
+            
+            <div class="filter-group">
+                <label class="filter-label" for="cardNetworkFilter">Card Network</label>
+                <select class="filter-control" id="cardNetworkFilter">
+                    <option value="all">All Networks</option>
+                    <option value="visa">Visa</option>
+                    <option value="mastercard">Mastercard</option>
+                    <option value="amex">American Express</option>
+                    <option value="discover">Discover</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="locationFilter">Location</label>
+                <select class="filter-control" id="locationFilter">
+                    <option value="all">All Locations</option>
+                    <option value="north">North America</option>
+                    <option value="south">South America</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asia</option>
+                    <option value="online">Online</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="ageGroupFilter">Age Group</label>
+                <select class="filter-control" id="ageGroupFilter">
+                    <option value="all">All Ages</option>
+                    <option value="18-25">18-25</option>
+                    <option value="26-35">26-35</option>
+                    <option value="36-45">36-45</option>
+                    <option value="46-55">46-55</option>
+                    <option value="56+">56+</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="amountRangeFilter">Transaction Amount</label>
+                <select class="filter-control" id="amountRangeFilter">
+                    <option value="all">All Amounts</option>
+                    <option value="0-100">$0 - $100</option>
+                    <option value="100-500">$100 - $500</option>
+                    <option value="500-1000">$500 - $1,000</option>
+                    <option value="1000+">$1,000+</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label" for="riskLevelFilter">Risk Level</label>
+                <select class="filter-control" id="riskLevelFilter">
+                    <option value="all">All Risk Levels</option>
+                    <option value="high">High Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="low">Low Risk</option>
+                </select>
+            </div>
+
+            <button class="reset-button" onclick="resetFilters()">🔄 Reset All Filters</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- KPI Cards Row -->
+            <div class="kpi-row">
+                <div class="kpi-card total">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">💰</div>
+                        <div class="kpi-trend trend-up">+12%</div>
+                    </div>
+                    <div class="kpi-value" id="totalFraudValue">$1.37M</div>
+                    <div class="kpi-label">Total Fraud Value</div>
+                </div>
+
+                <div class="kpi-card fraud">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">🚨</div>
+                        <div class="kpi-trend trend-up">+8%</div>
+                    </div>
+                    <div class="kpi-value" id="fraudCount">2,847</div>
+                    <div class="kpi-label">Fraud Cases</div>
+                </div>
+
+                <div class="kpi-card rate">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">📊</div>
+                        <div class="kpi-trend trend-down">-0.02%</div>
+                    </div>
+                    <div class="kpi-value" id="fraudRate">0.36%</div>
+                    <div class="kpi-label">Fraud Rate</div>
+                </div>
+
+                <div class="kpi-card avg">
+                    <div class="kpi-header">
+                        <div class="kpi-icon">📈</div>
+                        <div class="kpi-trend trend-up">+5%</div>
+                    </div>
+                    <div class="kpi-value" id="avgFraudAmount">$481</div>
+                    <div class="kpi-label">Avg Fraud Amount</div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="charts-grid">
+                <!-- Fraud by Location (Donut Chart) -->
+                <div class="chart-card">
+                    <div class="chart-title">🌍 Fraud by Location</div>
+                    <div class="chart-container">
+                        <canvas id="locationChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Fraud Over Time (Line Chart) -->
+                <div class="chart-card">
+                    <div class="chart-title">📈 Fraud Over Time</div>
+                    <div class="chart-container">
+                        <canvas id="timeChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Card Network Distribution (Stacked Bar) -->
+                <div class="chart-card">
+                    <div class="chart-title">💳 Card Network Risk Analysis</div>
+                    <div class="chart-container">
+                        <canvas id="networkChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Amount vs Risk Scatter Plot -->
+                <div class="chart-card">
+                    <div class="chart-title">💸 Amount vs Risk Correlation</div>
+                    <div class="chart-container">
+                        <canvas id="scatterChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Age Group Analysis (Wide Chart) -->
+                <div class="chart-card wide">
+                    <div class="chart-title">👥 Age Group Fraud Analysis</div>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart configurations for dark theme
+        Chart.defaults.color = '#f1f5f9';
+        Chart.defaults.borderColor = '#475569';
+        Chart.defaults.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+
+        let charts = {};
+
+        // Initialize all charts
+        function initializeCharts() {
+            console.log('Initializing charts...');
+            // 1. Fraud by Location (Donut Chart)
+            const locationCtx = document.getElementById('locationChart').getContext('2d');
+            charts.location = new Chart(locationCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['North America', 'Europe', 'Asia', 'South America', 'Online'],
+                    datasets: [{
+                        data: [35, 28, 18, 12, 7],
+                        backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
+                        borderColor: '#0f172a',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { usePointStyle: true, padding: 15 }
+                        }
+                    }
+                }
+            });
+
+            // 2. Fraud Over Time (Line Chart)
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            charts.time = new Chart(timeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                    datasets: [{
+                        label: 'Fraud Value ($K)',
+                        data: [120, 150, 180, 140, 200, 175, 190, 165, 137],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#0f172a',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#334155' } },
+                        x: { grid: { color: '#334155' } }
+                    }
+                }
+            });
+
+            // 3. Card Network Stacked Bar Chart
+            const networkCtx = document.getElementById('networkChart').getContext('2d');
+            charts.network = new Chart(networkCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Visa', 'Mastercard', 'Amex', 'Discover'],
+                    datasets: [
+                        {
+                            label: 'High Risk',
+                            data: [450, 320, 180, 95],
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Medium Risk',
+                            data: [680, 520, 240, 160],
+                            backgroundColor: '#f59e0b'
+                        },
+                        {
+                            label: 'Low Risk',
+                            data: [290, 180, 110, 75],
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true, grid: { color: '#334155' } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#334155' } }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // 4. Amount vs Risk Scatter Plot
+            const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+            charts.scatter = new Chart(scatterCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'High Risk',
+                            data: [
+                                {x: 1200, y: 0.85}, {x: 2500, y: 0.92}, {x: 3200, y: 0.88},
+                                {x: 1800, y: 0.79}, {x: 2100, y: 0.83}
+                            ],
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Medium Risk',
+                            data: [
+                                {x: 450, y: 0.45}, {x: 680, y: 0.52}, {x: 320, y: 0.38},
+                                {x: 750, y: 0.48}, {x: 590, y: 0.42}
+                            ],
+                            backgroundColor: '#f59e0b'
+                        },
+                        {
+                            label: 'Low Risk',
+                            data: [
+                                {x: 120, y: 0.15}, {x: 89, y: 0.12}, {x: 156, y: 0.18},
+                                {x: 98, y: 0.14}, {x: 134, y: 0.16}
+                            ],
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            title: { display: true, text: 'Transaction Amount ($)' },
+                            grid: { color: '#334155' }
+                        },
+                        y: { 
+                            title: { display: true, text: 'Risk Score' },
+                            grid: { color: '#334155' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // 5. Age Group Analysis (Wide Bar Chart)
+            const ageCtx = document.getElementById('ageChart').getContext('2d');
+            charts.age = new Chart(ageCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['18-25', '26-35', '36-45', '46-55', '56+'],
+                    datasets: [
+                        {
+                            label: 'Fraud Cases',
+                            data: [320, 890, 765, 542, 330],
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                            borderRadius: 8,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Avg Amount',
+                            data: [285, 520, 680, 450, 380],
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                            borderRadius: 8,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: '#334155' } },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Fraud Cases' },
+                            grid: { color: '#334155' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Average Amount ($)' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+
+        // Filter functionality
+        function applyFilters() {
+            // Get filter values
+            const filters = {
+                cardNetwork: document.getElementById('cardNetworkFilter').value,
+                location: document.getElementById('locationFilter').value,
+                ageGroup: document.getElementById('ageGroupFilter').value,
+                amountRange: document.getElementById('amountRangeFilter').value,
+                riskLevel: document.getElementById('riskLevelFilter').value
+            };
+
+            // Update KPI cards based on filters
+            console.log('Applying filters:', filters);
+            updateKPIs(filters);
+            
+            // Update charts based on filters
+            updateCharts(filters);
+        }
+
+        function updateKPIs(filters) {
+            // Simulate filtered data updates
+            let multiplier = 1;
+            if (filters.riskLevel === 'high') multiplier = 0.3;
+            if (filters.riskLevel === 'medium') multiplier = 0.5;
+            if (filters.riskLevel === 'low') multiplier = 0.2;
+
+            document.getElementById('totalFraudValue').textContent = `$${(1.37 * multiplier).toFixed(2)}M`;
+            document.getElementById('fraudCount').textContent = 
+                Math.round(2847 * multiplier).toLocaleString();
+            document.getElementById('fraudRate').textContent = `${(0.36 * multiplier).toFixed(2)}%`;
+            document.getElementById('avgFraudAmount').textContent = `$${Math.round(481 / multiplier)}`;
+        }
+
+        function updateCharts(filters) {
+            // Update charts based on filters (simplified simulation)
+            Object.values(charts).forEach(chart => {
+                if (chart && chart.update) {
+                    chart.update();
+                }
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('cardNetworkFilter').value = 'all';
+            document.getElementById('locationFilter').value = 'all';
+            document.getElementById('ageGroupFilter').value = 'all';
+            document.getElementById('amountRangeFilter').value = 'all';
+            document.getElementById('riskLevelFilter').value = 'all';
+            applyFilters();
+        }
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            
+            // Add filter event listeners
+            ['cardNetworkFilter', 'locationFilter', 'ageGroupFilter', 'amountRangeFilter', 'riskLevelFilter']
+                .forEach(id => {
+                    document.getElementById(id).addEventListener('change', applyFilters);
+                });
+        });
+    </script>
+</body>
+</html>
+
