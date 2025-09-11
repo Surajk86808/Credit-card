@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="160" height="34" viewBox="0 0 160 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="160" height="34" rx="6" fill="url(#g)"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="160" y2="34" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+  <g font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="18" fill="white">
+    <text x="12" y="22">CredSafe</text>
+  </g>
+  <circle cx="130" cy="17" r="9" fill="rgba(255,255,255,0.2)"/>
+  <path d="M126 17l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

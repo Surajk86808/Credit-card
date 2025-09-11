@@ -210,3 +210,15 @@ def dashboard_view(request):
         'target_col': target_col,
     }
     return render(request, 'dashboard.html', context)
+
+
+def dashboard_powerbi_view(request):
+    """Embed a Power BI report via URL query: ?embed=<FULL_EMBED_URL>"""
+    powerbi_embed_url = request.GET.get('embed')
+    return render(request, 'dashboard_powerbi.html', { 'powerbi_embed_url': powerbi_embed_url })
+
+
+def dashboard_tableau_view(request):
+    """Embed a Tableau visualization via URL query: ?embed=<FULL_EMBED_URL>"""
+    tableau_embed_url = request.GET.get('embed')
+    return render(request, 'dashboard_tableau.html', { 'tableau_embed_url': tableau_embed_url })

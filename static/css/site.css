@@ -1,0 +1,18 @@
+/* Shared site styles for CredSafe */
+:root {
+  --brand-color: #60a5fa;
+}
+.navbar .navbar-brand.brand {
+  font-weight: 800;
+  letter-spacing: .5px;
+  font-size: 1.5rem; /* slightly larger */
+}
+.navbar .nav-link { color: #cbd5e1; }
+.navbar .nav-link.active { color: #fff; }
+.footer-bar {
+  background: rgba(255,255,255,0.06);
+  color: #94a3b8;
+}
+.responsive-embed { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; }
+.responsive-embed iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:0; }
+.header-logo { height: 34px; width: auto; }

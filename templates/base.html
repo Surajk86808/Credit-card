@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}CredSafe{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <link href="{% static 'css/site.css' %}" rel="stylesheet" />
+  {% block head_extra %}{% endblock %}
+  <style>
+    body { background: #0f172a; color: #e5e7eb; }
+    .glass { background: rgba(255,255,255,0.08); border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,.3); backdrop-filter: blur(7px); border: 1px solid rgba(255,255,255,.15) }
+    .muted { color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <!-- Header / Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background: rgba(255,255,255,0.06)">
+    <div class="container">
+      <a class="navbar-brand brand d-flex align-items-center gap-2" href="{%- url 'home' -%}">
+        <img class="header-logo" src="{% static 'img/credsafe.svg' %}" alt="CredSafe" onerror="this.style.display='none'" />
+        <span>CredSafe</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link {% block nav_home_active %}{% endblock %}" href="{%- url 'home' -%}">Home</a></li>
+          <li class="nav-item"><a class="nav-link {% block nav_predict_active %}{% endblock %}" href="{%- url 'predict' -%}">Predict</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% block nav_dashboard_active %}{% endblock %}" href="#" id="dashDrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dashboards</a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dashDrop">
+              <li><a class="dropdown-item" href="{%- url 'dashboard' -%}">Built-in (Chart.js)</a></li>
+              <li><a class="dropdown-item" href="{%- url 'dashboard_powerbi' -%}">Power BI</a></li>
+              <li><a class="dropdown-item" href="{%- url 'dashboard_tableau' -%}">Tableau</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Body -->
+  <main class="container py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-bar py-3 mt-auto">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center">
+      <div class="small">© 2025 CredSafe. All rights reserved.</div>
+      <div class="small">
+        <a class="text-decoration-none me-3" href="{%- url 'dashboard' -%}">Dashboard</a>
+        <a class="text-decoration-none me-3" href="{%- url 'predict' -%}">Predict</a>
+        <a class="text-decoration-none" href="{%- url 'home' -%}">Home</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  {% block body_scripts %}{% endblock %}
+</body>
+</html>

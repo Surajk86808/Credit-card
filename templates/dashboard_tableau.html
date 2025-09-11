@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}CredSafe — Tableau Dashboard{% endblock %}
+{% block nav_dashboard_active %}active{% endblock %}
+{% block content %}
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="p-3 glass">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Tableau Dashboard</h5>
+          <small class="muted">Use the URL query param <code>?embed=</code> to set your viz URL</small>
+        </div>
+        <div class="responsive-embed">
+          {% if tableau_embed_url %}
+            <iframe title="Tableau" src="{{ tableau_embed_url }}" allowfullscreen="true"></iframe>
+          {% else %}
+            <div class="d-flex w-100 h-100 align-items-center justify-content-center flex-column text-center">
+              <div class="mb-2">Provide your Tableau Embed URL to view the visualization.</div>
+              <code class="small text-wrap">/dashboard/tableau/?embed=https://public.tableau.com/views/YOUR_WORKBOOK/YOUR_SHEET?:showVizHome=no</code>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
