@@ -8,5 +8,3 @@ joblib
 django>=4.2,<5
 mlflow
 
-# C:\Users\Laptop\Downloads\atomic-nation-465010-e1-70e53fdfb2d2.json
-# "C:\Users\Laptop\Downloads\atomic-nation-465010-e1-dd57832e2f22.json"

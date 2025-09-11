@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detection System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f1419;
+            --card-bg: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #2d1b69 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .glass-morphism {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="a" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="%23667eea" stop-opacity="0.1"/><stop offset="100%" stop-color="%23764ba2" stop-opacity="0"/></radialGradient></defs><circle cx="200" cy="200" r="200" fill="url(%23a)"/><circle cx="800" cy="300" r="150" fill="url(%23a)"/><circle cx="400" cy="700" r="180" fill="url(%23a)"/></svg>') no-repeat center center;
+            background-size: cover;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .action-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .action-card:hover::before {
+            left: 100%;
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-gradient {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-secondary-gradient {
+            background: var(--secondary-gradient);
+            border: none;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4);
+            color: white;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+        .floating-element:nth-child(2) { top: 60%; right: 10%; animation-delay: 2s; }
+        .floating-element:nth-child(3) { bottom: 20%; left: 20%; animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .dashboard-preview {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-preview:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Elements -->
+    <div class="floating-elements">
+        <i class="fas fa-shield-alt floating-element"></i>
+        <i class="fas fa-chart-line floating-element"></i>
+        <i class="fas fa-brain floating-element"></i>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="animate__animated animate__fadeInLeft">
+                        <h1 class="hero-title">Credit Card Fraud Detection System</h1>
+                        <p class="hero-subtitle">Advanced AI-powered fraud detection using machine learning algorithms to protect your financial transactions in real-time.</p>
+                        
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number">99.9%</div>
+                                    <div class="text-muted">Accuracy</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number">2M+</div>
+                                    <div class="text-muted">Transactions</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <div class="stats-number">24/7</div>
+                                    <div class="text-muted">Monitoring</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 flex-wrap">
+                            <a href="/predict/" class="btn btn-gradient btn-lg px-5 py-3 pulse-animation">
+                                <i class="fas fa-search me-2"></i>
+                                Detect Fraud
+                            </a>
+                            <a href="/dashboard/" class="btn btn-secondary-gradient btn-lg px-5 py-3">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                View Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="animate__animated animate__fadeInRight">
+                        <div class="row g-4">
+                            <!-- Prediction Card -->
+                            <div class="col-md-6">
+                                <div class="glass-morphism action-card p-4 h-100 text-center" onclick="window.location.href='/predict/'">
+                                    <div class="feature-icon mb-3">
+                                        <i class="fas fa-brain"></i>
+                                    </div>
+                                    <h4 class="mb-3">AI Prediction</h4>
+                                    <p class="text-muted mb-4">Enter transaction details and get instant fraud detection results powered by advanced machine learning algorithms.</p>
+                                    <div class="btn btn-outline-light btn-sm">
+                                        Start Detection <i class="fas fa-arrow-right ms-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dashboard Card -->
+                            <div class="col-md-6">
+                                <div class="glass-morphism action-card p-4 h-100 text-center" onclick="window.location.href='/dashboard/'">
+                                    <div class="feature-icon mb-3">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <h4 class="mb-3">Analytics Dashboard</h4>
+                                    <p class="text-muted mb-4">Comprehensive insights and visualizations of fraud patterns, trends, and model performance metrics.</p>
+                                    <div class="btn btn-outline-light btn-sm">
+                                        View Analytics <i class="fas fa-arrow-right ms-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Features Card -->
+                            <div class="col-12">
+                                <div class="glass-morphism p-4">
+                                    <h5 class="mb-3">Key Features</h5>
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <i class="fas fa-lightning-bolt text-warning mb-2" style="font-size: 1.5rem;"></i>
+                                            <div class="small">Real-time</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <i class="fas fa-shield-alt text-success mb-2" style="font-size: 1.5rem;"></i>
+                                            <div class="small">Secure</div>
+                                        </div>
+                                        <div class="col-4">
+                                            <i class="fas fa-cogs text-info mb-2" style="font-size: 1.5rem;"></i>
+                                            <div class="small">Accurate</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Preview Section -->
+    <section class="py-5" style="background: rgba(0, 0, 0, 0.2);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-6 mb-3">Interactive Dashboard Preview</h2>
+                <p class="lead text-muted">Real-time fraud detection analytics and insights</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="dashboard-preview">
+                        <!-- Embedded Power BI Dashboard -->
+                        <iframe 
+                            title="Fraud Detection Dashboard" 
+                            width="100%" 
+                            height="600" 
+                            src="https://app.powerbi.com/view?r=eyJrIjoiYWJjZGVmZ2gtaWprbC1tbm9wLXFyc3QtdXZ3eHl6MTIzNCIsInQiOiJjNzg5MDEyMy00NTY3LTg5MDEtMjM0NS02Nzg5MDEyMzQ1NjcifQ%3D%3D" 
+                            frameborder="0" 
+                            allowFullScreen="true">
+                        </iframe>
+                        <!-- Note: Replace the src URL above with your actual Power BI embed URL -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="/dashboard/" class="btn btn-secondary-gradient btn-lg px-5">
+                    <i class="fas fa-expand me-2"></i>
+                    Open Full Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center">
+        <div class="container">
+            <div class="glass-morphism py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start">
+                        <p class="mb-0">© 2024 Credit Card Fraud Detection System</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-0">Powered by Django & Machine Learning</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add smooth scrolling and interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effects to action cards
+            const actionCards = document.querySelectorAll('.action-card');
+            actionCards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Add ripple effect
+                    const ripple = document.createElement('div');
+                    const rect = card.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.3);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
+                    
+                    card.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Simulate stats counter animation
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + (target === 99.9 ? '.9%' : target >= 1000000 ? 'M+' : '');
+            }, 20);
+        }
+
+        // Trigger counter animation when in view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const numberElements = entry.target.querySelectorAll('.stats-number');
+                    numberElements.forEach(el => {
+                        const text = el.textContent;
+                        if (text.includes('%')) {
+                            animateCounter(el, 99.9);
+                        } else if (text.includes('M+')) {
+                            animateCounter(el, 2);
+                        } else if (text.includes('/')) {
+                            el.textContent = '24/7';
+                        }
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        document.querySelectorAll('.stats-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

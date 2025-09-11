@@ -1,0 +1,580 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detector - Enhanced Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            --warning-gradient: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #2d1b69 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .navbar {
+            background: rgba(15, 20, 25, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-title {
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge-soft {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-gradient {
+            background: var(--primary-gradient);
+            color: white;
+            border: 0;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            color: #ffffff;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .result-card {
+            border-left: 6px solid #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
+            transition: all 0.3s ease;
+        }
+
+        .result-card.danger {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar {
+            background: var(--primary-gradient);
+            border-radius: 10px;
+        }
+
+        .feature-input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-input-group .form-control {
+            padding-left: 45px;
+        }
+
+        .feature-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            z-index: 10;
+        }
+
+        .prediction-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .confidence-meter {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 1s ease;
+            border-radius: 5px;
+        }
+
+        .confidence-high { background: var(--success-gradient); }
+        .confidence-medium { background: var(--warning-gradient); }
+        .confidence-low { background: var(--danger-gradient); }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            z-index: 1000;
+        }
+
+        .spinner-border {
+            color: #667eea;
+        }
+
+        .alert-custom {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fecaca;
+            border-radius: 15px;
+        }
+
+        .tips-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-shield-alt me-2"></i>
+                Fraud Detector
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <a class="nav-link active" href="{% url 'predict' %}">
+                    <i class="fas fa-brain me-1"></i>Predict
+                </a>
+                <a class="nav-link" href="{% url 'dashboard' %}">
+                    <i class="fas fa-chart-bar me-1"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-lg-10">
+                <div class="p-4 p-md-5 glass animate__animated animate__fadeInDown">
+                    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap">
+                        <span class="badge badge-soft px-3 py-2">
+                            <i class="fas fa-robot me-2"></i>AI Powered
+                        </span>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-muted">
+                                <i class="fas fa-cog me-1"></i>Logistic Regression
+                            </span>
+                            {% if has_model %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>Model Ready
+                            </span>
+                            {% else %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>Model Loading
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <h1 class="display-6 hero-title mb-3">
+                        <i class="fas fa-search me-3"></i>
+                        Credit Card Fraud Detection
+                    </h1>
+                    <p class="lead mb-0">
+                        Enter transaction details to get instant fraud detection results. 
+                        Our advanced AI model analyzes patterns to determine if a transaction is 
+                        <strong class="text-success">legitimate</strong> or potentially <strong class="text-danger">fraudulent</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Messages -->
+        {% if error %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-lg-10">
+                <div class="alert alert-custom animate__animated animate__fadeIn">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Error:</strong> {{ error }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <div class="row g-4">
+            <!-- Input Form -->
+            <div class="col-12 col-lg-7">
+                <div class="glass p-4 animate__animated animate__fadeInLeft position-relative" id="form-container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card me-2 text-primary"></i>
+                            Transaction Details
+                        </h5>
+                        <small class="text-muted">{{ feature_names|length }} fields required</small>
+                    </div>
+                    
+                    <form method="post" novalidate id="prediction-form">
+                        {% csrf_token %}
+                        {% if feature_names %}
+                        <div class="row g-3">
+                            {% for field in form %}
+                            <div class="col-12 col-md-6">
+                                <div class="feature-input-group">
+                                    <i class="fas fa-{% if 'Amount' in field.label %}dollar-sign{% elif 'Time' in field.label %}clock{% elif 'Age' in field.label %}user{% elif 'Limit' in field.label %}credit-card{% elif 'Balance' in field.label %}wallet{% else %}info-circle{% endif %} feature-icon"></i>
+                                    <label class="form-label">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    {% if field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                        {{ field.errors|striptags }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mt-4 d-grid d-md-flex gap-3">
+                            <button class="btn btn-gradient px-5 py-3" type="submit" id="predict-btn">
+                                <i class="fas fa-brain me-2"></i>
+                                <span class="btn-text">Analyze Transaction</span>
+                            </button>
+                            <a class="btn btn-secondary px-4 py-3" href="{% url 'predict' %}">
+                                <i class="fas fa-redo me-2"></i>Reset Form
+                            </a>
+                            <a class="btn btn-outline-light px-4 py-3" href="{% url 'home' %}">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-custom" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Configuration Issue:</strong> 
+                            Could not load feature definitions. Please ensure the model is properly trained and artifacts are available.
+                            <hr>
+                            <small>Check if the CSV file exists at: <code>{{ raw_csv_path }}</code></small>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="col-12 col-lg-5">
+                <div class="glass p-4 animate__animated animate__fadeInRight mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Analysis Result
+                    </h5>
+                    
+                    {% if prediction is not None %}
+                    <div class="result-card card border-0 {% if prediction == 1 %}danger{% endif %} animate__animated animate__fadeInUp prediction-animation">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                {% if prediction == 1 %}
+                                <h3 class="text-danger mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Fraudulent Transaction
+                                </h3>
+                                <span class="badge bg-danger">HIGH RISK</span>
+                                {% else %}
+                                <h3 class="text-success mb-0">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Legitimate Transaction
+                                </h3>
+                                <span class="badge bg-success">SAFE</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if probability %}
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted">Fraud Probability:</span>
+                                    <span class="fw-bold">{{ probability|floatformat:1 }}%</span>
+                                </div>
+                                <div class="confidence-meter">
+                                    <div class="confidence-fill confidence-{% if probability > 0.7 %}high{% elif probability > 0.3 %}medium{% else %}low{% endif %}" 
+                                         style="width: {{ probability|floatformat:1 }}%"></div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if confidence %}
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="fas fa-tachometer-alt text-info"></i>
+                                <span class="text-muted">Model Confidence:</span>
+                                <span class="fw-bold">{{ confidence }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if risk_level %}
+                            <div class="mt-3 p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-shield-alt me-2 {% if prediction == 1 %}text-danger{% else %}text-success{% endif %}"></i>
+                                    <strong>Risk Assessment: {{ risk_level }}</strong>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar text-muted mb-3" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="text-muted">Submit the form above to see fraud detection results.</p>
+                        <small class="text-muted">Analysis typically takes less than a second</small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tips Card -->
+                <div class="tips-card p-4">
+                    <h6 class="mb-3">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>
+                        Detection Tips
+                    </h6>
+                    <ul class="small mb-0 ps-3">
+                        <li class="mb-2">Higher transaction amounts may increase fraud likelihood</li>
+                        <li class="mb-2">Unusual transaction times (very late/early) can be suspicious</li>
+                        <li class="mb-2">Transactions near credit limits are flagged more often</li>
+                        <li class="mb-2">Age and spending patterns are key indicators</li>
+                        <li>Model accuracy: <strong class="text-success">99.9%</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Summary (if prediction made) -->
+        {% if input_values %}
+        <div class="row justify-content-center mt-5">
+            <div class="col-12 col-lg-10">
+                <div class="glass p-4 animate__animated animate__fadeInUp">
+                    <h6 class="mb-3">
+                        <i class="fas fa-list me-2"></i>
+                        Transaction Summary
+                    </h6>
+                    <div class="row g-3">
+                        {% for field_name, value in input_values.items %}
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="p-3 rounded" style="background: rgba(255, 255, 255, 0.05);">
+                                <div class="small text-muted">{{ field_name|title }}</div>
+                                <div class="fw-bold">{{ value|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Loading Overlay (hidden by default) -->
+    <div class="loading-overlay d-none" id="loading-overlay">
+        <div class="text-center">
+            <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="text-white">Analyzing transaction...</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('prediction-form');
+            const predictBtn = document.getElementById('predict-btn');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const formContainer = document.getElementById('form-container');
+
+            // Form submission with loading state
+            form.addEventListener('submit', function(e) {
+                // Show loading state
+                predictBtn.disabled = true;
+                predictBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i><span class="btn-text">Analyzing...</span>';
+                
+                // Show loading overlay
+                formContainer.style.position = 'relative';
+                loadingOverlay.classList.remove('d-none');
+
+                // Simulate processing time (remove in production)
+                setTimeout(() => {
+                    // Form will submit naturally
+                }, 500);
+            });
+
+            // Add input validation and formatting
+            const numberInputs = document.querySelectorAll('input[type="number"]');
+            numberInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    // Remove invalid styling when user starts typing
+                    this.classList.remove('is-invalid');
+                });
+
+                input.addEventListener('blur', function() {
+                    // Format number on blur
+                    if (this.value && !isNaN(this.value)) {
+                        const value = parseFloat(this.value);
+                        if (this.step === '0.01') {
+                            this.value = value.toFixed(2);
+                        }
+                    }
+                });
+            });
+
+            // Add smooth scroll to results
+            {% if prediction is not None %}
+            setTimeout(() => {
+                const resultCard = document.querySelector('.result-card');
+                if (resultCard) {
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            {% endif %}
+
+            // Animate confidence bar
+            const confidenceFill = document.querySelector('.confidence-fill');
+            if (confidenceFill) {
+                setTimeout(() => {
+                    confidenceFill.style.width = confidenceFill.style.width;
+                }, 500);
+            }
+
+            // Add ripple effects to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+
+            // Add CSS for ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
